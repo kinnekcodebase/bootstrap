@@ -1,6 +1,6 @@
 {
   "author": "https://github.com/angular-ui/bootstrap/graphs/contributors",
-  "name": "angular-ui-bootstrap",
+  "name": "kinnek-ng-bootstrap",
   "version": "2.2.1-SNAPSHOT",
   "homepage": "http://angular-ui.github.io/bootstrap/",
   "dependencies": {},
