@@ -1,6 +1,17 @@
 var marked = require('marked');
 var fs = require('fs');
 var _ = require('lodash');
+var includedModules = [
+    'dropdown',
+    'debounce',
+    'modal',
+    'isClass',
+    'progressbar',
+    'popover',
+    'position',
+    'tooltip',
+    'typeahead'
+  ].map(function(moduleName){ return 'src/'+moduleName; });
 
 module.exports = function(grunt) {
   require('load-grunt-tasks')(grunt);
@@ -8,9 +19,13 @@ module.exports = function(grunt) {
   // Project configuration.
   grunt.util.linefeed = '\n';
 
+  grunt.loadNpmTasks('grunt-contrib-watch');
+  grunt.loadNpmTasks('grunt-contrib-connect');
+  grunt.loadNpmTasks('grunt-contrib-livereload');
+
   grunt.initConfig({
     ngversion: '1.5.8',
-    bsversion: '3.3.7',
+    bsversion: '4.0.0-alpha.5',
     modules: [],//to be filled in by build task
     pkg: grunt.file.readJSON('package.json'),
     dist: 'dist',
@@ -32,18 +47,44 @@ module.exports = function(grunt) {
         ' */'
       ].join('\n')
     },
+    connect: {
+      server: {
+        options: {
+          port: 9001,
+          hostname: '0.0.0.0',
+          base: 'dist',
+          // keepalive: true,
+          livereload: true
+          // middleware: function(connect, options) {
+          //   return [
+          //     require('grunt-contrib-livereload/lib/utils').livereloadSnippet,
+          //     connect.static(options.base)
+          //   ];
+          // }
+        }
+      }
+    },
+    watch: {
+      all: {
+        files: ['misc/**/*', 'src/**/**/*', 'template/**/**/*'],
+        tasks: ['after-test'],
+        options: {
+          livereload: true
+        }
+      }
+    },
     delta: {
       docs: {
-        files: ['misc/demo/index.html'],
+        files: ['misc/demo/index.html', 'src/**/**/*.html'],
         tasks: ['after-test']
       },
       html: {
         files: ['template/**/*.html'],
-        tasks: ['html2js', 'karma:watch:run']
+        tasks: ['after-test']
       },
       js: {
         files: ['src/**/*.js', '!src/**/index.js'],
-        tasks: ['karma:watch:run']
+        tasks: ['after-test']
       }
     },
     concat: {
@@ -89,6 +130,10 @@ module.exports = function(grunt) {
     },
     uglify: {
       options: {
+        sourceMap: true,
+        beautify: true,
+        mangle: false,
+        sourceMapName: '<%= dist %>/<%= filename %>-<%= pkg.version %>.map',
         banner: '<%= meta.banner %>'
       },
       dist:{
@@ -192,7 +237,7 @@ module.exports = function(grunt) {
   //Rename our watch task to 'delta', then make actual 'watch'
   //task build things, then start test server
   grunt.renameTask('watch', 'delta');
-  grunt.registerTask('watch', ['before-test', 'after-test', 'karma:watch', 'delta']);
+  grunt.registerTask('watch', ['before-test', 'after-test', 'delta']);
 
   // Default task.
   grunt.registerTask('default', ['before-test', 'test', 'after-test']);
@@ -301,8 +346,9 @@ module.exports = function(grunt) {
       grunt.config('filename', grunt.config('filenamecustom'));
     } else {
       grunt.file.expand({
-        filter: 'isDirectory', cwd: '.'
-      }, 'src/*').forEach((dir) => {
+        filter: 'isDirectory',
+        cwd: '.'
+      }, includedModules).forEach((dir) => {
         findModule(dir.split('/')[1]);
       });
     }
@@ -479,6 +525,30 @@ module.exports = function(grunt) {
       }
     });
   });
+
+  grunt.registerTask('serve', [
+    'after-test',
+    'livereload-start',
+    'connect:server',
+    'watch'
+  ]);
+  // grunt.registerTask('server', function() {
+  //   var static = require('node-static');
+  //   var fileServer = new static.Server('./dist');
+  //   require('http').createServer(function (request, response) {
+  //       request.addListener('end', function () {
+  //           fileServer.serve(request, response, function (err, result) {
+  //               if (err) { // There was an error serving the file
+  //                   console.error("Error serving " + request.url + " - " + err.message);
+  //
+  //                   // Respond to the client
+  //                   response.writeHead(err.status, err.headers);
+  //                   response.end();
+  //               }
+  //           });
+  //       }).resume();
+  //   }).listen(8080);
+  // });
 
   return grunt;
 };

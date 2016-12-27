@@ -42,5 +42,7 @@ angular.module('ui.bootstrap.popover', ['ui.bootstrap.tooltip'])
 })
 
 .directive('uibPopover', ['$uibTooltip', function($uibTooltip) {
-  return $uibTooltip('uibPopover', 'popover', 'click');
+  return $uibTooltip('uibPopover', 'popover', 'click', {
+    placementClassPrefix: 'popover-'
+  });
 }]);

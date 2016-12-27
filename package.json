@@ -20,7 +20,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/angular-ui/bootstrap.git"
+    "url": "https://github.com/kinnekcodebase/ng-bootstrap.git"
   },
   "devDependencies": {
     "angular": "1.5.8",
@@ -32,6 +32,7 @@
     "grunt-contrib-copy": "^1.0.0",
     "grunt-contrib-uglify": "^1.0.1",
     "grunt-contrib-watch": "^1.0.0",
+    "grunt-contrib-livereload": "^0.1.2",
     "grunt-conventional-changelog": "^6.1.0",
     "grunt-ddescribe-iit": "0.0.6",
     "grunt-eslint": "^17.3.1",
