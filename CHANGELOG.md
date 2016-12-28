@@ -1,3 +1,18 @@
+<a name="2.2.1"></a>
+## [2.2.1](https://github.com/kinnekcodebase/ng-bootstrap/compare/2.2.0...v2.2.1) (2016-12-28)
+
+
+### Bug Fixes
+
+* **package:** updated package name ([a7db2b2](https://github.com/kinnekcodebase/ng-bootstrap/commit/a7db2b2))
+
+
+### Features
+
+* **everything:** updated certain modules to work with bootstrap 4 ([6d11724](https://github.com/kinnekcodebase/ng-bootstrap/commit/6d11724))
+
+
+
 <a name="2.2.0"></a>
 # [2.2.0](https://github.com/angular-ui/bootstrap/compare/2.1.4...v2.2.0) (2016-10-10)
 
