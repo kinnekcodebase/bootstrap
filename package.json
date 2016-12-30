@@ -11,7 +11,10 @@
     "index.js",
     "dist/",
     "src/",
-    "template/"
+    "template/",
+    "*.js",
+    "*.css",
+    "*.map"
   ],
   "main": "index.js",
   "scripts": {
