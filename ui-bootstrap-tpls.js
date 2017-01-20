@@ -2,10 +2,10 @@
  * kinnek-ng-bootstrap
  * http://angular-ui.github.io/bootstrap/
 
- * Version: 2.4.0 - 2016-12-29
+ * Version: 2.4.3 - 2017-01-20
  * License: MIT
- */angular.module("ui.bootstrap", ["ui.bootstrap.tpls", "ui.bootstrap.position","ui.bootstrap.dropdown","ui.bootstrap.stackedMap","ui.bootstrap.modal","ui.bootstrap.tooltip","ui.bootstrap.popover","ui.bootstrap.debounce","ui.bootstrap.typeahead"]);
-angular.module("ui.bootstrap.tpls", ["uib/template/modal/window.html","uib/template/tooltip/tooltip-html-popup.html","uib/template/tooltip/tooltip-popup.html","uib/template/tooltip/tooltip-template-popup.html","uib/template/popover/popover-html.html","uib/template/popover/popover-template.html","uib/template/popover/popover.html","uib/template/typeahead/typeahead-match.html","uib/template/typeahead/typeahead-popup.html"]);
+ */angular.module("ui.bootstrap", ["ui.bootstrap.tpls", "ui.bootstrap.position","ui.bootstrap.dropdown","ui.bootstrap.debounce","ui.bootstrap.stackedMap","ui.bootstrap.modal","ui.bootstrap.isClass","ui.bootstrap.progressbar","ui.bootstrap.tooltip","ui.bootstrap.popover","ui.bootstrap.typeahead"]);
+angular.module("ui.bootstrap.tpls", ["uib/template/modal/window.html","uib/template/progressbar/bar.html","uib/template/progressbar/progress.html","uib/template/progressbar/progressbar.html","uib/template/tooltip/tooltip-html-popup.html","uib/template/tooltip/tooltip-popup.html","uib/template/tooltip/tooltip-template-popup.html","uib/template/popover/popover-html.html","uib/template/popover/popover-template.html","uib/template/popover/popover.html","uib/template/typeahead/typeahead-match.html","uib/template/typeahead/typeahead-popup.html"]);
 angular.module('ui.bootstrap.position', [])
 
 /**
@@ -989,6 +989,28 @@ angular.module('ui.bootstrap.dropdown', ['ui.bootstrap.position'])
   };
 });
 
+angular.module('ui.bootstrap.debounce', [])
+/**
+ * A helper, internal service that debounces a function
+ */
+  .factory('$$debounce', ['$timeout', function($timeout) {
+    return function(callback, debounceTime) {
+      var timeoutPromise;
+
+      return function() {
+        var self = this;
+        var args = Array.prototype.slice.call(arguments);
+        if (timeoutPromise) {
+          $timeout.cancel(timeoutPromise);
+        }
+
+        timeoutPromise = $timeout(function() {
+          callback.apply(self, args);
+        }, debounceTime);
+      };
+    };
+  }]);
+
 angular.module('ui.bootstrap.stackedMap', [])
 /**
  * A helper, internal data structure that acts as a map but also allows getting / removing
@@ -1930,6 +1952,214 @@ angular.module('ui.bootstrap.modal', ['ui.bootstrap.stackedMap', 'ui.bootstrap.p
     return $modalProvider;
   });
 
+// Avoiding use of ng-class as it creates a lot of watchers when a class is to be applied to
+// at most one element.
+angular.module('ui.bootstrap.isClass', [])
+.directive('uibIsClass', [
+         '$animate',
+function ($animate) {
+  //                    11111111          22222222
+  var ON_REGEXP = /^\s*([\s\S]+?)\s+on\s+([\s\S]+?)\s*$/;
+  //                    11111111           22222222
+  var IS_REGEXP = /^\s*([\s\S]+?)\s+for\s+([\s\S]+?)\s*$/;
+
+  var dataPerTracked = {};
+
+  return {
+    restrict: 'A',
+    compile: function(tElement, tAttrs) {
+      var linkedScopes = [];
+      var instances = [];
+      var expToData = {};
+      var lastActivated = null;
+      var onExpMatches = tAttrs.uibIsClass.match(ON_REGEXP);
+      var onExp = onExpMatches[2];
+      var expsStr = onExpMatches[1];
+      var exps = expsStr.split(',');
+
+      return linkFn;
+
+      function linkFn(scope, element, attrs) {
+        linkedScopes.push(scope);
+        instances.push({
+          scope: scope,
+          element: element
+        });
+
+        exps.forEach(function(exp, k) {
+          addForExp(exp, scope);
+        });
+
+        scope.$on('$destroy', removeScope);
+      }
+
+      function addForExp(exp, scope) {
+        var matches = exp.match(IS_REGEXP);
+        var clazz = scope.$eval(matches[1]);
+        var compareWithExp = matches[2];
+        var data = expToData[exp];
+        if (!data) {
+          var watchFn = function(compareWithVal) {
+            var newActivated = null;
+            instances.some(function(instance) {
+              var thisVal = instance.scope.$eval(onExp);
+              if (thisVal === compareWithVal) {
+                newActivated = instance;
+                return true;
+              }
+            });
+            if (data.lastActivated !== newActivated) {
+              if (data.lastActivated) {
+                $animate.removeClass(data.lastActivated.element, clazz);
+              }
+              if (newActivated) {
+                $animate.addClass(newActivated.element, clazz);
+              }
+              data.lastActivated = newActivated;
+            }
+          };
+          expToData[exp] = data = {
+            lastActivated: null,
+            scope: scope,
+            watchFn: watchFn,
+            compareWithExp: compareWithExp,
+            watcher: scope.$watch(compareWithExp, watchFn)
+          };
+        }
+        data.watchFn(scope.$eval(compareWithExp));
+      }
+
+      function removeScope(e) {
+        var removedScope = e.targetScope;
+        var index = linkedScopes.indexOf(removedScope);
+        linkedScopes.splice(index, 1);
+        instances.splice(index, 1);
+        if (linkedScopes.length) {
+          var newWatchScope = linkedScopes[0];
+          angular.forEach(expToData, function(data) {
+            if (data.scope === removedScope) {
+              data.watcher = newWatchScope.$watch(data.compareWithExp, data.watchFn);
+              data.scope = newWatchScope;
+            }
+          });
+        } else {
+          expToData = {};
+        }
+      }
+    }
+  };
+}]);
+angular.module('ui.bootstrap.progressbar', [])
+
+.constant('uibProgressConfig', {
+  animate: true,
+  max: 100
+})
+
+.controller('UibProgressController', ['$scope', '$attrs', 'uibProgressConfig', function($scope, $attrs, progressConfig) {
+  var self = this,
+      animate = angular.isDefined($attrs.animate) ? $scope.$parent.$eval($attrs.animate) : progressConfig.animate;
+
+  this.bars = [];
+  $scope.max = getMaxOrDefault();
+
+  this.addBar = function(bar, element, attrs) {
+    if (!animate) {
+      element.css({'transition': 'none'});
+    }
+
+    this.bars.push(bar);
+
+    bar.max = getMaxOrDefault();
+    bar.title = attrs && angular.isDefined(attrs.title) ? attrs.title : 'progressbar';
+
+    bar.$watch('value', function(value) {
+      bar.recalculatePercentage();
+    });
+
+    bar.recalculatePercentage = function() {
+      var totalPercentage = self.bars.reduce(function(total, bar) {
+        bar.percent = +(100 * bar.value / bar.max).toFixed(2);
+        return total + bar.percent;
+      }, 0);
+
+      if (totalPercentage > 100) {
+        bar.percent -= totalPercentage - 100;
+      }
+    };
+
+    bar.$on('$destroy', function() {
+      element = null;
+      self.removeBar(bar);
+    });
+  };
+
+  this.removeBar = function(bar) {
+    this.bars.splice(this.bars.indexOf(bar), 1);
+    this.bars.forEach(function (bar) {
+      bar.recalculatePercentage();
+    });
+  };
+
+  //$attrs.$observe('maxParam', function(maxParam) {
+  $scope.$watch('maxParam', function(maxParam) {
+    self.bars.forEach(function(bar) {
+      bar.max = getMaxOrDefault();
+      bar.recalculatePercentage();
+    });
+  });
+
+  function getMaxOrDefault () {
+    return angular.isDefined($scope.maxParam) ? $scope.maxParam : progressConfig.max;
+  }
+}])
+
+.directive('uibProgress', function() {
+  return {
+    replace: true,
+    transclude: true,
+    controller: 'UibProgressController',
+    require: 'uibProgress',
+    scope: {
+      maxParam: '=?max'
+    },
+    templateUrl: 'uib/template/progressbar/progress.html'
+  };
+})
+
+.directive('uibBar', function() {
+  return {
+    replace: true,
+    transclude: true,
+    require: '^uibProgress',
+    scope: {
+      value: '=',
+      type: '@'
+    },
+    templateUrl: 'uib/template/progressbar/bar.html',
+    link: function(scope, element, attrs, progressCtrl) {
+      progressCtrl.addBar(scope, element, attrs);
+    }
+  };
+})
+
+.directive('uibProgressbar', function() {
+  return {
+    replace: true,
+    transclude: true,
+    controller: 'UibProgressController',
+    scope: {
+      value: '=',
+      maxParam: '=?max',
+      type: '@'
+    },
+    templateUrl: 'uib/template/progressbar/progressbar.html',
+    link: function(scope, element, attrs, progressCtrl) {
+      progressCtrl.addBar(scope, angular.element(element.children()[0]), {title: attrs.title});
+    }
+  };
+});
+
 /**
  * The following features are still outstanding: animation as a
  * function, placement as a function, inside, support for more triggers than
@@ -2704,28 +2934,6 @@ angular.module('ui.bootstrap.popover', ['ui.bootstrap.tooltip'])
   });
 }]);
 
-angular.module('ui.bootstrap.debounce', [])
-/**
- * A helper, internal service that debounces a function
- */
-  .factory('$$debounce', ['$timeout', function($timeout) {
-    return function(callback, debounceTime) {
-      var timeoutPromise;
-
-      return function() {
-        var self = this;
-        var args = Array.prototype.slice.call(arguments);
-        if (timeoutPromise) {
-          $timeout.cancel(timeoutPromise);
-        }
-
-        timeoutPromise = $timeout(function() {
-          callback.apply(self, args);
-        }, debounceTime);
-      };
-    };
-  }]);
-
 angular.module('ui.bootstrap.typeahead', ['ui.bootstrap.debounce', 'ui.bootstrap.position'])
 
 /**
@@ -3405,6 +3613,25 @@ angular.module('ui.bootstrap.typeahead', ['ui.bootstrap.debounce', 'ui.bootstrap
 angular.module("uib/template/modal/window.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("uib/template/modal/window.html",
     "<div class=\"modal-dialog {{size ? 'modal-' + size : ''}}\"><div class=\"modal-content\" uib-modal-transclude></div></div>\n" +
+    "");
+}]);
+
+angular.module("uib/template/progressbar/bar.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("uib/template/progressbar/bar.html",
+    "<div class=\"progress-bar\" ng-class=\"type && 'progress-bar-' + type\" role=\"progressbar\" aria-valuenow=\"{{value}}\" aria-valuemin=\"0\" aria-valuemax=\"{{max}}\" ng-style=\"{width: (percent < 100 ? percent : 100) + '%'}\" aria-valuetext=\"{{percent | number:0}}%\" aria-labelledby=\"{{::title}}\" ng-transclude></div>\n" +
+    "");
+}]);
+
+angular.module("uib/template/progressbar/progress.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("uib/template/progressbar/progress.html",
+    "<div class=\"progress\" ng-transclude aria-labelledby=\"{{::title}}\"></div>");
+}]);
+
+angular.module("uib/template/progressbar/progressbar.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("uib/template/progressbar/progressbar.html",
+    "<div class=\"progress\">\n" +
+    "  <div class=\"progress-bar\" ng-class=\"type && 'progress-bar-' + type\" role=\"progressbar\" aria-valuenow=\"{{value}}\" aria-valuemin=\"0\" aria-valuemax=\"{{max}}\" ng-style=\"{width: (percent < 100 ? percent : 100) + '%'}\" aria-valuetext=\"{{percent | number:0}}%\" aria-labelledby=\"{{::title}}\" ng-transclude></div>\n" +
+    "</div>\n" +
     "");
 }]);
 
