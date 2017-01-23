@@ -10,6 +10,7 @@ var includedModules = [
     'popover',
     'position',
     'tooltip',
+    'tabs',
     'typeahead'
   ].map(function(moduleName){ return 'src/'+moduleName; });
 
