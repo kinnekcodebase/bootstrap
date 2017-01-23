@@ -2,7 +2,7 @@
  * kinnek-ng-bootstrap
  * http://angular-ui.github.io/bootstrap/
 
- * Version: 2.4.3 - 2017-01-20
+ * Version: 2.4.5 - 2017-01-23
  * License: MIT
  */angular.module("ui.bootstrap", ["ui.bootstrap.position","ui.bootstrap.dropdown","ui.bootstrap.debounce","ui.bootstrap.stackedMap","ui.bootstrap.modal","ui.bootstrap.isClass","ui.bootstrap.progressbar","ui.bootstrap.tooltip","ui.bootstrap.popover","ui.bootstrap.typeahead"]);
 angular.module('ui.bootstrap.position', [])
