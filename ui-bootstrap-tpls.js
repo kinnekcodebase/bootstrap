@@ -3965,7 +3965,7 @@ angular.module("uib/template/typeahead/typeahead-match.html", []).run(["$templat
 
 angular.module("uib/template/typeahead/typeahead-popup.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("uib/template/typeahead/typeahead-popup.html",
-    "<div class=\"dropdown\" ng-class=\"{'open': isOpen() && !moveInProgress}\">\n" +
+    "<div class=\"dropdown\" ng-class=\"{'show': isOpen() && !moveInProgress}\">\n" +
     "  <div\n" +
     "    class=\"dropdown-menu\"\n" +
     "    ng-show=\"isOpen() && !moveInProgress\"\n" +
