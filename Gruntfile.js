@@ -4,6 +4,9 @@ var _ = require('lodash');
 var includedModules = [
     'dropdown',
     'debounce',
+    'datepicker',
+    'datepickerPopup',
+    'dateparser',
     'modal',
     'isClass',
     'progressbar',
