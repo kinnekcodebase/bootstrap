@@ -2686,7 +2686,7 @@ function($scope, $element, $attrs, $compile, $log, $parse, $window, $document, $
       var placement = $attrs.popupPlacement ? $attrs.popupPlacement : datepickerPopupConfig.placement;
       var position = $position.positionElements($element, dpElement, placement, appendToBody);
       dpElement.css({top: position.top + 'px', left: position.left + 'px'});
-      angular.element($popup[0]).addClass('show');
+      $popup[0].addClass('show');
       if (dpElement.hasClass('uib-position-measure')) {
         dpElement.removeClass('uib-position-measure');
       }
