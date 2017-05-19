@@ -264,7 +264,6 @@ function($scope, $element, $attrs, $compile, $log, $parse, $window, $document, $
   }
 
   $scope.$watch('isOpen', function(value) {
-    var dpElement = angular.element($popup[0].querySelector('.uib-datepicker-popup'));
     if (value) {
       if (!$scope.disabled) {
         $timeout(function() {
