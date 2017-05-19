@@ -368,6 +368,7 @@ function($scope, $element, $attrs, $compile, $log, $parse, $window, $document, $
 
   function documentClickBind(event) {
     if (!$scope.isOpen && $scope.disabled) {
+
       return;
     }
 
@@ -379,6 +380,7 @@ function($scope, $element, $attrs, $compile, $log, $parse, $window, $document, $
     if ($scope.isOpen && !(dpContainsTarget || popupContainsTarget)) {
       $scope.$apply(function() {
         $scope.isOpen = false;
+        $element[0].focus();
       });
     }
   }
