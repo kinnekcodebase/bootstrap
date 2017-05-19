@@ -2,7 +2,7 @@
  * kinnek-ng-bootstrap
  * http://angular-ui.github.io/bootstrap/
 
- * Version: 2.5.0 - 2017-05-19
+ * Version: 2.5.1 - 2017-05-19
  * License: MIT
  */angular.module("ui.bootstrap", ["ui.bootstrap.position","ui.bootstrap.dropdown","ui.bootstrap.debounce","ui.bootstrap.dateparser","ui.bootstrap.isClass","ui.bootstrap.datepicker","ui.bootstrap.datepickerPopup","ui.bootstrap.stackedMap","ui.bootstrap.modal","ui.bootstrap.progressbar","ui.bootstrap.tooltip","ui.bootstrap.popover","ui.bootstrap.tabs","ui.bootstrap.typeahead"]);
 angular.module('ui.bootstrap.position', [])
@@ -2543,7 +2543,6 @@ function($scope, $element, $attrs, $compile, $log, $parse, $window, $document, $
   }
 
   $scope.$watch('isOpen', function(value) {
-    var dpElement = angular.element($popup[0].querySelector('.uib-datepicker-popup'));
     if (value) {
       if (!$scope.disabled) {
         $timeout(function() {
