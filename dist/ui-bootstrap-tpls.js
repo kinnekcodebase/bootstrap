@@ -2,7 +2,7 @@
  * kinnek-ng-bootstrap
  * http://angular-ui.github.io/bootstrap/
 
- * Version: 2.5.1 - 2017-05-19
+ * Version: 2.5.1 - 2017-05-22
  * License: MIT
  */angular.module("ui.bootstrap", ["ui.bootstrap.tpls", "ui.bootstrap.position","ui.bootstrap.dropdown","ui.bootstrap.debounce","ui.bootstrap.dateparser","ui.bootstrap.isClass","ui.bootstrap.datepicker","ui.bootstrap.datepickerPopup","ui.bootstrap.stackedMap","ui.bootstrap.modal","ui.bootstrap.progressbar","ui.bootstrap.tooltip","ui.bootstrap.popover","ui.bootstrap.tabs","ui.bootstrap.typeahead"]);
 angular.module("ui.bootstrap.tpls", ["uib/template/datepicker/datepicker.html","uib/template/datepicker/day.html","uib/template/datepicker/month.html","uib/template/datepicker/year.html","uib/template/datepickerPopup/popup.html","uib/template/modal/window.html","uib/template/progressbar/bar.html","uib/template/progressbar/progress.html","uib/template/progressbar/progressbar.html","uib/template/tooltip/tooltip-html-popup.html","uib/template/tooltip/tooltip-popup.html","uib/template/tooltip/tooltip-template-popup.html","uib/template/popover/popover-html.html","uib/template/popover/popover-template.html","uib/template/popover/popover.html","uib/template/tabs/tab.html","uib/template/tabs/tabset.html","uib/template/typeahead/typeahead-match.html","uib/template/typeahead/typeahead-popup.html"]);
@@ -2568,6 +2568,7 @@ function($scope, $element, $attrs, $compile, $log, $parse, $window, $document, $
           angular.element($window).on('resize', positionPopup);
         }, 0, false);
       } else {
+        console.log('closing!');
         $scope.isOpen = false;
       }
     } else {
@@ -2648,6 +2649,7 @@ function($scope, $element, $attrs, $compile, $log, $parse, $window, $document, $
 
   function documentClickBind(event) {
     if (!$scope.isOpen && $scope.disabled) {
+
       return;
     }
 
@@ -2659,6 +2661,7 @@ function($scope, $element, $attrs, $compile, $log, $parse, $window, $document, $
     if ($scope.isOpen && !(dpContainsTarget || popupContainsTarget)) {
       $scope.$apply(function() {
         $scope.isOpen = false;
+        $element[0].focus();
       });
     }
   }
@@ -2686,7 +2689,6 @@ function($scope, $element, $attrs, $compile, $log, $parse, $window, $document, $
       var placement = $attrs.popupPlacement ? $attrs.popupPlacement : datepickerPopupConfig.placement;
       var position = $position.positionElements($element, dpElement, placement, appendToBody);
       dpElement.css({top: position.top + 'px', left: position.left + 'px'});
-      angular.element($popup[0]).addClass('show');
       if (dpElement.hasClass('uib-position-measure')) {
         dpElement.removeClass('uib-position-measure');
       }
