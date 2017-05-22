@@ -2546,6 +2546,7 @@ function($scope, $element, $attrs, $compile, $log, $parse, $window, $document, $
     if (value) {
       if (!$scope.disabled) {
         $timeout(function() {
+          angular.element($popup[0]).addClass('show');
           positionPopup();
 
           if (onOpenFocus) {
