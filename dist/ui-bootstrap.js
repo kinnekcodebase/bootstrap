@@ -2,7 +2,7 @@
  * kinnek-ng-bootstrap
  * http://angular-ui.github.io/bootstrap/
 
- * Version: 2.5.1 - 2017-05-22
+ * Version: 2.5.2 - 2017-07-13
  * License: MIT
  */angular.module("ui.bootstrap", ["ui.bootstrap.position","ui.bootstrap.dropdown","ui.bootstrap.debounce","ui.bootstrap.dateparser","ui.bootstrap.isClass","ui.bootstrap.datepicker","ui.bootstrap.datepickerPopup","ui.bootstrap.stackedMap","ui.bootstrap.modal","ui.bootstrap.progressbar","ui.bootstrap.tooltip","ui.bootstrap.popover","ui.bootstrap.tabs","ui.bootstrap.typeahead"]);
 angular.module('ui.bootstrap.position', [])
@@ -3797,7 +3797,7 @@ angular.module('ui.bootstrap.tooltip', ['ui.bootstrap.position', 'ui.bootstrap.s
   // The default options tooltip and popover.
   var defaultOptions = {
     placement: 'top',
-    placementClassPrefix: '',
+    placementClassPrefix: 'tooltip-',
     animation: true,
     popupDelay: 0,
     popupCloseDelay: 0,
@@ -3913,7 +3913,7 @@ angular.module('ui.bootstrap.tooltip', ['ui.bootstrap.position', 'ui.bootstrap.s
           'class="uib-position-measure ' + prefix + '" ' +
           'tooltip-animation-class="fade"' +
           'uib-tooltip-classes ' +
-          'ng-class="{ in: isOpen }" ' +
+          'ng-class="{ in: isOpen, show: isOpen }" ' +
           '>' +
         '</div>';
 
